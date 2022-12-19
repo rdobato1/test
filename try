@@ -1,0 +1,35 @@
+import discord
+import qrcode
+
+client = discord.Client()
+
+@client.event
+async def on_ready():
+    print(f'Logged in as {client.user}!')
+
+@client.event
+async def on_message(message):
+    if message.content == '!getToken':
+        # Check if the user has the necessary permissions to use this command
+        if not message.channel.permissions_for(message.author).manage_guild:
+            return await message.channel.send('You do not have permission to use this command.')
+
+        # Get the user's Discord ID
+        user_id = message.mentions[0].id
+
+        # Get the user's token using the Discord API
+        user = await client.fetch_user(user_id)
+        token = user.token
+
+        # Generate a QR code containing the user's token
+        qr = qrcode.make(token)
+
+        # Save the QR code to a file
+        with open('token.png', 'wb') as f:
+            qr.save(f)
+
+        # Send the QR code to the user
+        with open('token.png', 'rb') as f:
+            await message.channel.send(file=discord.File(f, 'token.png'))
+
+client.run('MTA1NDI0ODEwMjA3ODQ1MTc0Mw.GjWX0I.hUvAgnDKgKbb6QwmwpcpJ1PR3VHivcVdJipq3o')
